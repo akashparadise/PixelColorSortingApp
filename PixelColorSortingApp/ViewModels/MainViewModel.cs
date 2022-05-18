@@ -56,19 +56,20 @@ namespace PixelColorSortingApp.ViewModels
             IsWorking = true;
             string methodName = "CreateRandomPixel";
             try
-                {
-                    int width = 640;
-                    int height = 320;
+            {
+                int width = 640;
+                int height = 320;
 
                 _logger.LogInformation($"{ methodName }: Creating a bitmap source of random pixels");
-                    ImageToShow = _createRandomPixels.CreateRandomBitmapSource(width, height);
-                    OnPropertyChanged(nameof(ImageToShow));
-                }
-                catch (Exception ex) 
-                {
+                ImageToShow = _createRandomPixels.CreateRandomBitmapSource(width, height);
+                OnPropertyChanged(nameof(ImageToShow));
+            }
+            catch (Exception ex)
+            {
                 _logger.LogError($"{ methodName }: { ex.Message }");
-                Status = ex.Message; 
-                }
+                Status = ex.Message;
+            }
+
             IsWorking = false;
             return ImageToShow == null ? false : true;
         }
@@ -77,39 +78,40 @@ namespace PixelColorSortingApp.ViewModels
         {
             IsWorking = true;
             string methodName = "ColorSortingButton_Click";
-                try
+            try
+            {
+                _logger.LogInformation($"{ methodName }: Color sorting button click event started");
+
+                if (ImageToShow != null)
                 {
-                    _logger.LogInformation($"{ methodName }: Color sorting button click event started");
+                    Bitmap bmpOut = null;
 
-                    if (ImageToShow != null)
-                    {                     
-                        Bitmap bmpOut = null;
+                    _logger.LogInformation($"{ methodName }: converting image with random pixels to bitmap");
 
-                        _logger.LogInformation($"{ methodName }: converting image with random pixels to bitmap");
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        BmpBitmapEncoder encoder = new BmpBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(ImageToShow));
+                        encoder.Save(ms);
 
-                        using (MemoryStream ms = new MemoryStream())
+                        using (Bitmap bmp = new Bitmap(ms))
                         {
-                            BmpBitmapEncoder encoder = new BmpBitmapEncoder();
-                            encoder.Frames.Add(BitmapFrame.Create(ImageToShow));
-                            encoder.Save(ms);
-
-                            using (Bitmap bmp = new Bitmap(ms))
-                            {
-                                bmpOut = new Bitmap(bmp);
-                            }
+                            bmpOut = new Bitmap(bmp);
                         }
+                    }
 
                     ImageToShow = _bitmapToImageConverter.BitmapToImageSource(bmpOut);
                     OnPropertyChanged(nameof(ImageToShow));
 
                     _logger.LogInformation($"{ methodName }: Color sorting button click event finished");
                 }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"{ methodName }: { ex.Message }");
-                    Status = ex.Message;
-                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ methodName }: { ex.Message }");
+                Status = ex.Message;
+            }
+
             IsWorking = false;
             return ImageToShow == null ? false : true;
         }
